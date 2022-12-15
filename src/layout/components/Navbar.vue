@@ -1,11 +1,14 @@
 <template>
   <div class="navbar">
-    <hamburger id="hamburger-container" :is-active="sidebar.opened" class="hamburger-container" @toggleClick="toggleSideBar" />
+    <div style="float: left; margin: 10px" class="flex items-center">
+      <img src="@/assets/logo/logo.png" style="height: 28px; margin-left: 20px">
+    </div>
+    <!-- <hamburger id="hamburger-container" :is-active="sidebar.opened" class="hamburger-container" @toggleClick="toggleSideBar" /> -->
 
-    <breadcrumb id="breadcrumb-container" class="breadcrumb-container" v-if="!topNav"/>
+    <!-- <breadcrumb id="breadcrumb-container" class="breadcrumb-container" v-if="!topNav"/> -->
     <top-nav id="topmenu-container" class="topmenu-container" v-if="topNav"/>
 
-    <div class="right-menu">
+    <div class="right-menu flex">
       <template v-if="device!=='mobile'">
         <search id="header-search" class="right-menu-item" />
 
@@ -23,8 +26,8 @@
 
       <el-dropdown class="avatar-container right-menu-item hover-effect" trigger="click">
         <div class="avatar-wrapper">
-          <img :src="avatar" class="user-avatar">
-          <i class="el-icon-caret-bottom" />
+          <img height="32" width="32" :src="avatar" class="user-avatar">
+          <i class="el-icon-caret-bottom"/>
         </div>
         <el-dropdown-menu slot="dropdown">
           <router-link to="/user/profile">
@@ -86,9 +89,6 @@ export default {
     }
   },
   methods: {
-    toggleSideBar() {
-      this.$store.dispatch('app/toggleSideBar')
-    },
     async logout() {
       this.$confirm('确定注销并退出系统吗？', '提示', {
         confirmButtonText: '确定',
@@ -141,7 +141,6 @@ export default {
 
   .right-menu {
     float: right;
-    margin-top: 5px;
     height: 100%;
     line-height: 50px;
 
@@ -150,20 +149,16 @@ export default {
     }
 
     .right-menu-item {
-      display: inline-block;
+      display: flex;
+      align-items: center;
       padding: 0 8px;
       height: 100%;
       font-size: 18px;
       color: #5a5e66;
-      vertical-align: text-bottom;
 
       &.hover-effect {
         cursor: pointer;
         transition: background .3s;
-
-        &:hover {
-          background: rgba(0, 0, 0, .025)
-        }
       }
     }
 
@@ -171,13 +166,10 @@ export default {
       margin-right: 30px;
 
       .avatar-wrapper {
-        margin-top: 5px;
         position: relative;
 
         .user-avatar {
           cursor: pointer;
-          width: 40px;
-          height: 40px;
           border-radius: 10px;
         }
 
@@ -185,8 +177,9 @@ export default {
           cursor: pointer;
           position: absolute;
           right: -20px;
-          top: 25px;
+          top: 50%;
           font-size: 12px;
+          transform: translateY(-50%);
         }
       }
     }

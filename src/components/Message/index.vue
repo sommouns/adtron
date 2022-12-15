@@ -1,7 +1,16 @@
 <template>
-  <div>
-    <el-badge class="item" :value="unReadCount >0 ? unReadCount : ''">
-      <i class="el-icon-message-solid"  @click="getList()"></i>
+  <div  @click="getList()">
+    <el-badge
+      class="item flex items-center justify-center"
+      style="background: #f5f6f8; height: 28px; width: 28px; border-radius: 50%"
+      :value="unReadCount > 0 ? unReadCount : ''"
+      
+    >
+      <i
+        class="el-icon-message-solid"
+        style="font-size: 12px; display: block"
+       
+      ></i>
     </el-badge>
     <el-dialog
       title="消息列表"
@@ -97,7 +106,11 @@
               <el-input v-model="form.header" placeholder="请输入消息标题" />
             </el-form-item>
             <el-form-item label="消息内容" prop="context">
-              <el-input type="textarea" v-model="form.context" placeholder="请输入消息内容" />
+              <el-input
+                type="textarea"
+                v-model="form.context"
+                placeholder="请输入消息内容"
+              />
             </el-form-item>
           </el-form>
           <div slot="footer" class="dialog-footer">
@@ -191,8 +204,8 @@ export default {
       hasAdmin: this.$auth.hasRole("admin"),
       // 角色表格数据
       roleList: [],
-      webSocketNum:1,
-      socketUserId:null
+      webSocketNum: 1,
+      socketUserId: null,
     };
   },
   created() {
@@ -290,21 +303,20 @@ export default {
         .catch(() => {});
     },
     initWebSocket() {
-      if (this.webSocketNum <=3){
+      if (this.webSocketNum <= 3) {
         //初始化weosocket
-          this.webSocketNum++;
-          const wsuri =
-            "wss://www.adtron.info/prod-api/web_socket/user/" +
-            this.socketUserId +
-            "/" +
-            Date.parse(new Date());
-          this.websock = new WebSocket(wsuri);
-          this.websock.onmessage = this.websocketonmessage;
-          this.websock.onopen = this.websocketonopen;
-          this.websock.onerror = this.websocketonerror;
-          this.websock.onclose = this.websocketclose;
+        this.webSocketNum++;
+        const wsuri =
+          "wss://www.adtron.info/prod-api/web_socket/user/" +
+          this.socketUserId +
+          "/" +
+          Date.parse(new Date());
+        this.websock = new WebSocket(wsuri);
+        this.websock.onmessage = this.websocketonmessage;
+        this.websock.onopen = this.websocketonopen;
+        this.websock.onerror = this.websocketonerror;
+        this.websock.onclose = this.websocketclose;
       }
-
     },
     websocketonopen() {
       //连接建立之后执行send方法发送数据
@@ -370,7 +382,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-::v-deep .el-badge__content.is-fixed{
-top: 5px !important;
+::v-deep .el-badge__content.is-fixed {
+  top: 5px !important;
 }
 </style>
