@@ -1,16 +1,16 @@
 <template>
   <div :class="classObj" class="app-wrapper" :style="{'--current-color': theme}">
-    <div v-if="device==='mobile'&&sidebar.opened" class="drawer-bg" @click="handleClickOutside"/>
-    <sidebar class="sidebar-container"/>
-    <div :class="{hasTagsView:needTagsView}" class="main-container">
+    <!-- <div v-if="device==='mobile'&&sidebar.opened" class="drawer-bg" @click="handleClickOutside"/> -->
+    <navbar/>
+    <div :class="{hasTagsView:needTagsView}" class="main-container flex">
+      <sidebar class="sidebar-container"  style="height: calc(100vh - 50px); overflow: scroll"/>
       <div :class="{'fixed-header':fixedHeader}">
-        <navbar />
-        <tags-view v-if="needTagsView" />
+        <!-- <tags-view v-if="needTagsView" /> -->
       </div>
-      <app-main />
-      <right-panel>
+      <app-main style="height: calc(100vh - 50px); overflow: scroll"/>
+      <!-- <right-panel>
         <settings />
-      </right-panel>
+      </right-panel> -->
     </div>
   </div>
 </template>
@@ -69,8 +69,6 @@ export default {
   .app-wrapper {
     @include clearfix;
     position: relative;
-    height: 100%;
-    width: 100%;
 
     &.mobile.openSidebar {
       position: fixed;

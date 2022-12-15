@@ -1,335 +1,404 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
-
-
-      <el-form-item label="账号" prop="shopId">
-        <el-select
-          v-model="queryParams.shopId"
-          placeholder="请选择账号"
-          clearable
-          filterable
-          size="small"
-          style="width: 160px"
-        >
-          <el-option
-            v-for="item in accountList"
-            :key="item.id"
-            :label="item.accountName + '-' + item.site"
-            :value="item.id"
-          />
-        </el-select>
-      </el-form-item>
-
-      <el-form-item
-        label="广告活动名称"
-        label-width="100px"
-        prop="campaignName"
+    <div class="flex justify-between items-center mb-5">
+      <div>你好，{{ userName }}</div>
+      <el-form
+        :model="queryParams"
+        ref="queryForm"
+        :inline="true"
+        v-show="showSearch"
+        label-width="68px"
+        class="bi-report_nav"
       >
-        <el-input
-          v-model="queryParams.campaignName"
-          placeholder="请输入广告活动名称"
-          clearable
-          size="small"
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-
-
-      <el-form-item label="日期">
-        <div class="block">
-          <el-date-picker
-            style="width: 240px"
-            @change="getTime"
-            v-model="queryParams.dateTime"
-            type="daterange"
-            align="right"
-            size="small"
-            unlink-panels
-            value-format="yyyy-MM-dd"
-            format="yyyy-MM-dd"
-            range-separator="至"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
-            :picker-options="pickerOptions"
+        <el-form-item class="mb-0 mr-0">
+          <div class="flex bg-white items-center pl-2 rounded-md">
+            <div
+              style="
+                font-size: 12px;
+                line-height: 24px;
+                border-right: 1px solid #ddd;
+              "
+            >
+              <el-button
+                class="mr-3 h-6 p-1 pt-0 pb-0"
+                style="margin-left: 0px; border: none"
+                size="mini"
+                @click="() => changeDate(datePreset.LAST_DAY)"
+                >昨天</el-button
+              >
+              <el-button
+                class="mr-3 h-6 p-1 pt-0 pb-0"
+                style="margin-left: 0px; border: none"
+                size="mini"
+                @click="() => changeDate(datePreset.LAST_7_DAY)"
+                >近7日</el-button
+              >
+              <el-button
+                class="mr-3 h-6 p-1 pt-0 pb-0"
+                style="margin-left: 0px; border: none"
+                size="mini"
+                @click="() => changeDate(datePreset.LAST_30_DAY)"
+                >近30日</el-button
+              >
+              <el-button
+                class="mr-1 p-1 pt-0 pb-0 h-6"
+                style="margin-left: 0px; border: none"
+                size="mini"
+                @click="() => changeDate(datePreset.LAST_90_DAY)"
+                >近90日</el-button
+              >
+            </div>
+            <el-date-picker
+              style="width: 240px; border: none"
+              @change="getTime"
+              v-model="queryParams.dateTime"
+              type="daterange"
+              align="right"
+              size="small"
+              unlink-panels
+              value-format="yyyy-MM-dd"
+              format="yyyy-MM-dd"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+              :picker-options="pickerOptions"
+            >
+            </el-date-picker>
+          </div>
+        </el-form-item>
+        <!-- <test-tree-map v-if="expressionList.length" :list="expressionList"/> -->
+        <el-form-item class="mb-0 mr-0" prop="shopId">
+          <div
+            class="
+              dashboard_search-item
+              flex
+              items-center
+              justify-center
+              bg-white
+              rounded-md
+              pl-2
+              text-xs
+            "
           >
-          </el-date-picker>
-        </div>
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-      </el-form-item>
-    </el-form>
+            <div class="mr-2" style="color: #606266">账号</div>
+            <el-select
+              v-model="queryParams.shopId"
+              placeholder="请选择账号"
+              clearable
+              filterable
+              size="small"
+              style="width: 160px"
+            >
+              <el-option
+                v-for="item in accountList"
+                :key="item.id"
+                :label="item.accountName + '-' + item.site"
+                :value="item.id"
+              />
+            </el-select>
+          </div>
+        </el-form-item>
+
+        <el-form-item label-width="100px" prop="campaignName" class="mb-0 mr-0">
+          <div
+            class="
+              dashboard_search-item
+              flex
+              items-center
+              justify-center
+              bg-white
+              rounded-md
+              pl-2
+              text-xs
+            "
+          >
+            <div class="mr-2" style="color: #606266">广告活动</div>
+            <el-input
+              v-model="queryParams.campaignName"
+              placeholder="请输入"
+              clearable
+              size="small"
+              @keyup.enter.native="handleQuery"
+              class="flex-1"
+            />
+          </div>
+        </el-form-item>
+        <el-button
+          type="primary"
+          icon="el-icon-search"
+          size="mini"
+          @click="handleQuery"
+          style="margin-top: 2px"
+          >搜索</el-button
+        >
+      </el-form>
+    </div>
 
     <el-row :gutter="3" class="analysis">
-      <el-row :gutter="30">
-        <el-col :xs="12" :sm="12" :lg="{span: '4-8'}" class="card-panel-col">
-          <el-card shadow="always">
-            <div style="padding-top: 10px;text-align: center;font-size: 22px;font-weight: bolder">
-              广告花费
+      <el-card class="box-card">
+        <div class="flex">
+          <div class="flex-1 summary">
+            <div class="summary_title">广告花费</div>
+            <div class="summary_value">
+              <summary-money-label :money="this.formatNums(this.totalFees)" />
             </div>
-            <div style="padding-top: 10px;text-align: center;font-size: 46px;font-weight: bolder">
-              ${{this.formatNums(this.totalFees)}}
+          </div>
+          <div class="flex-1 summary">
+            <div class="summary_title">广告销售额</div>
+            <div class="summary_value">
+              <summary-money-label
+                :money="this.formatNums(this.totalSalesFees)"
+              />
+            </div>
+          </div>
+          <div class="flex-1 summary">
+            <div class="summary_title">ACOS</div>
+            <div class="summary_value">{{ this.totalAcos }}%</div>
+          </div>
+          <div class="flex-1 summary">
+            <div class="summary_title">ROAS</div>
+            <div class="summary_value">
+              {{ this.totalRoas }}
+            </div>
+          </div>
+          <div class="flex-1 summary">
+            <div class="summary_title">TACOS</div>
+            <div class="summary_value">{{ this.totalTacos }}%</div>
+          </div>
+        </div>
+        <div class="flex">
+          <div class="flex-1 summary">
+            <div class="summary_title">曝光量</div>
+            <div class="summary_value">
+              {{ this.totalImpressions }}
+            </div>
+          </div>
+          <div class="flex-1 summary">
+            <div class="summary_title">点击量</div>
+            <div class="summary_value">
+              {{ this.totalImpressions }}
+            </div>
+          </div>
+          <div class="flex-1 summary">
+            <div class="summary_title">点击率</div>
+            <div class="summary_value">{{ this.totalClicks }}%</div>
+          </div>
+          <div class="flex-1 summary">
+            <div class="summary_title">CPC</div>
+            <div class="summary_value">{{ this.totalCpc }}%</div>
+          </div>
+          <div class="flex-1 summary"></div>
+        </div>
+      </el-card>
+      <el-row :gutter="10" style="margin-top: 10px">
+        <el-col :span="12">
+          <el-card class="board-card">
+            <div class="board-card_head flex justify-between">
+              <div class="board-card_head_title ml-5 mt-5">广告花费统计</div>
+              <div class="board-card_head_date mt-5 mr-5">
+                {{ currentTime[0] || "~" }} 至 {{ currentTime[1] || "~" }}
+              </div>
+            </div>
+            <el-checkbox-group
+              v-model="payBoardGroup"
+              size="mini"
+              class="ml-5 mt-3 mb-2"
+              @change="handlePayBoardGroupChange"
+            >
+              <el-checkbox-button label="销售额">销售额</el-checkbox-button>
+              <el-checkbox-button label="广告花费">广告花费</el-checkbox-button>
+              <el-checkbox-button label="ACOS">ACOS</el-checkbox-button>
+              <el-checkbox-button label="TACOS">TACOS</el-checkbox-button>
+            </el-checkbox-group>
+            <div class="mb-5">
+              <div id="mainOne" style="height: 240px"></div>
             </div>
           </el-card>
         </el-col>
-        <el-col :xs="12" :sm="12" :lg="{span: '4-8'}" class="card-panel-col">
-          <el-card shadow="always">
-            <div style="padding-top: 10px;text-align: center;font-size: 22px;font-weight: bolder">
-              广告销售额
+        <el-col :span="12">
+          <el-card class="board-card">
+            <div class="board-card_head flex justify-between">
+              <div class="board-card_head_title ml-5 mt-5">广告效果统计</div>
+              <div class="board-card_head_date mt-5 mr-5">
+                {{ currentTime[0] || "~" }} 至 {{ currentTime[1] || "~" }}
+              </div>
             </div>
-            <div style="padding-top: 10px;text-align: center;font-size: 46px;font-weight: bolder">
-              ${{this.formatNums(this.totalSalesFees)}}
+            <el-checkbox-group
+              v-model="adEffectGroup"
+              size="mini"
+              class="ml-5 mt-3 mb-2"
+              @change="handleAdEffectGroupChange"
+            >
+              <el-checkbox-button label="曝光量">曝光量</el-checkbox-button>
+              <el-checkbox-button label="点击量">点击量</el-checkbox-button>
+              <el-checkbox-button label="点击率">点击率</el-checkbox-button>
+              <el-checkbox-button label="CPC">CPC</el-checkbox-button>
+            </el-checkbox-group>
+            <div class="mb-5">
+              <div id="mainTwo" style="height: 240px"></div>
             </div>
-          </el-card>
-        </el-col>
-        <el-col :xs="12" :sm="12" :lg="{span: '4-8'}" class="card-panel-col">
-          <el-card shadow="always">
-            <div style="padding-top: 10px;text-align: center;font-size: 22px;font-weight: bolder">
-              ACOS
-              <el-tooltip type="primary"  placement="top">
-                <div slot="content">广告花费占比（Advertising Cost of Sale）<br/>广告花费 / 广告销售额</div>
-                <i class="el-icon-question"></i>
-              </el-tooltip>
-            </div>
-            <div style="padding-top: 10px;text-align: center;font-size: 46px;font-weight: bolder">
-              {{this.totalAcos}}%
-            </div>
-          </el-card>
-        </el-col>
-        <el-col :xs="12" :sm="12" :lg="{span: '4-8'}" class="card-panel-col">
-          <el-card shadow="always">
-            <div style="padding-top: 10px;text-align: center;font-size: 22px;font-weight: bolder">
-              ROAS
-              <el-tooltip type="primary"  placement="top">
-                <div slot="content">广告支出回报率（Return On Advertising Spend）<br/>广告销售额 / 广告花费</div>
-                <i class="el-icon-question"></i>
-              </el-tooltip>
-            </div>
-            <div style="padding-top: 10px;text-align: center;font-size: 46px;font-weight: bolder">
-              {{this.totalRoas}}
-            </div>
-
-          </el-card>
-        </el-col>
-        <el-col :xs="12" :sm="12" :lg="{span: '4-8'}" class="card-panel-col">
-          <el-card shadow="always">
-            <div style="padding-top: 10px;text-align: center;font-size: 22px;font-weight: bolder">
-              TACOS
-              <el-tooltip type="primary"  placement="top">
-                <div slot="content">销售的总广告成本（Total Advertising Cost of Sale）<br/>广告花费 / 店铺的销售总额</div>
-                <i class="el-icon-question"></i>
-              </el-tooltip>
-            </div>
-            <div style="padding-top: 10px;text-align: center;font-size: 46px;font-weight: bolder">
-              {{this.totalTacos}}%
-            </div>
-
           </el-card>
         </el-col>
       </el-row>
-      <el-row :gutter="30" style="margin-top: 10px;margin-left: 1px;">
-        <el-tabs type="border-card" style="width: 49%;float: left;" :stretch="true" @tab-click="handleClick" v-model="activeNameOne">
-          <el-tab-pane name="first">
-          <span slot="label" >
-            <div style="text-align: center;font-size: 14px;height: 24px;font-weight: bolder">
-              销售
-            </div>
-            <div style="text-align: center;font-size: 24px;font-weight: bolder">
-              ${{this.formatNums(this.totalSalesFees)}}
-            </div>
-          </span>
-            <div class="echarts" style="height:300px;">
-              <div id="mainOne" style="height:300px;"></div>
-            </div>
-          </el-tab-pane>
-          <el-tab-pane name="second">
-          <span slot="label">
-            <div style="text-align: center;font-size: 14px;height: 24px;font-weight: bolder">
-              广告花费
-            </div>
-            <div style="text-align: center;font-size: 24px;font-weight: bolder">
-              ${{this.formatNums(this.totalFees)}}
-            </div>
-          </span>
-            <div class="echarts" style="height:300px;">
-              <div id="mainTwo" style="height:300px;"></div>
-            </div>
-          </el-tab-pane>
-        </el-tabs>
-        <el-tabs type="border-card" style="width: 49%;float: right;margin-right: 10px" :stretch="true" @tab-click="handleClickTwo" v-model="activeNameTwo">
-          <el-tab-pane name="first">
-          <span slot="label">
-            <div style="text-align: center;font-size: 14px;height: 24px;font-weight: bolder">
-              ACOS
-              <el-tooltip type="primary"  placement="top">
-                <div slot="content">广告花费占比（Advertising Cost of Sale）<br/>广告花费 / 广告销售额</div>
-                <i class="el-icon-question"></i>
-              </el-tooltip>
-            </div>
-            <div style="text-align: center;font-size: 24px;font-weight: bolder">
-              {{this.totalAcos}}%
-            </div>
-          </span>
-            <div class="echarts" style="height:300px;">
-              <div id="mainThree" style="height:300px;"></div>
-            </div>
-          </el-tab-pane>
-          <el-tab-pane name="second">
-          <span slot="label">
-            <div style="text-align: center;font-size: 14px;height: 24px;font-weight: bolder">
-              TACOS
-              <el-tooltip type="primary"  placement="top">
-                <div slot="content">销售的总广告成本（Total Advertising Cost of Sale）<br/>广告花费 / 店铺的销售总额</div>
-                <i class="el-icon-question"></i>
-              </el-tooltip>
-            </div>
-            <div style="text-align: center;font-size: 24px;font-weight: bolder">
-              {{this.totalTacos}}%
-            </div>
-          </span>
-            <div class="echarts" style="height:300px;">
-              <div id="mainFour" style="height:300px;"></div>
-            </div>
-          </el-tab-pane>
-        </el-tabs>
-      </el-row>
 
-      <el-row :gutter="30" style="margin-top: 10px;margin-left: 1px;">
-        <el-tabs type="border-card" style="width: 49%;float: left;" :stretch="true" @tab-click="handleClickThree" v-model="activeNameThree">
-          <el-tab-pane name="first">
-          <span slot="label">
-            <div style="text-align: center;font-size: 14px;height: 24px;font-weight: bolder">
-              展示量
+      <el-row :gutter="0" style="margin-top: 10px">
+        <el-card class="board-card pb-5">
+          <el-col :span="12">
+            <div class="board-card_head flex justify-between">
+              <div class="board-card_head_title ml-5 mt-5">
+                广告活动销售额占比
+              </div>
             </div>
-            <div style="text-align: center;font-size: 24px;font-weight: bolder">
-              {{this.formatNums(this.totalImpressions)}}
+            <div class="mb-2">
+              <div id="main" style="height: 240px"></div>
+              <div class="flex mt-2 ml-5">
+                <div class="matric-tree_title">广告活动ACOS</div>
+                <div class="flex matric-tree_bar-wrapper items-center ml-3">
+                  <div class="mr-1">高</div>
+                  <div class="matric-tree_bar"></div>
+                  <div class="ml-1">低</div>
+                </div>
+              </div>
             </div>
-          </span>
-            <div class="echarts" style="height:300px;">
-              <div id="mainFive" style="height:300px;"></div>
+          </el-col>
+          <el-col :span="12">
+            <div class="board-card_head flex justify-between">
+              <div class="board-card_head_title ml-5 mt-5">
+                托管广告活动销售额Top10
+              </div>
             </div>
-          </el-tab-pane>
-          <el-tab-pane name="second">
-          <span slot="label">
-            <div style="text-align: center;font-size: 14px;height: 24px;font-weight: bolder">
-              点击量
-            </div>
-            <div style="text-align: center;font-size: 24px;font-weight: bolder">
-              {{this.formatNums(this.totalClicks)}}
-            </div>
-          </span>
-            <div class="echarts" style="height:300px;">
-              <div id="mainSix" style="height:300px;"></div>
-            </div>
-          </el-tab-pane>
-          <el-tab-pane name="third">
-          <span slot="label">
-            <div style="text-align: center;font-size: 14px;height: 24px;font-weight: bolder">
-              点击率
-            </div>
-            <div style="text-align: center;font-size: 24px;font-weight: bolder">
-              {{this.totalClickPercent}}%
-            </div>
-          </span>
-            <div class="echarts" style="height:300px;">
-              <div id="mainSeven" style="height:300px;"></div>
-            </div>
-          </el-tab-pane>
-          <el-tab-pane name="fourth">
-          <span slot="label">
-            <div style="text-align: center;font-size: 14px;height: 24px;font-weight: bolder">
-              CPC($)
-              <el-tooltip type="primary"  placement="top">
-                <div slot="content">单次点击花费（Cost Per Clicks）<br/>点击量 / 广告花费</div>
-                <i class="el-icon-question"></i>
-              </el-tooltip>
-            </div>
-            <div style="text-align: center;font-size: 24px;font-weight: bolder">
-              {{this.totalCpc}}
-            </div>
-          </span>
-            <div class="echarts" style="height:300px;">
-              <div id="mainEight" style="height:300px;"></div>
-            </div>
-          </el-tab-pane>
-        </el-tabs>
-
-        <div class="echarts" style="width: 49%;height:400px;margin-right: 10px;float: right;box-shadow: 0 2px 22px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .06)">
-          <div style="padding-left:15px;padding-top:3px;">
-            <span style="font-weight: bolder;">广告活动表现</span>
-
-            <span style="margin-left: 5px;">
-              <el-tooltip type="primary"  placement="top">
-                <div slot="content">广告活动销售额:面积(销售额越大面积越大)<br/>ACOS:颜色(ACOS越大颜色越深)</div>
+            <div class="mb-2"></div>
+          </el-col>
+        </el-card>
+        <!-- <div
+          class="echarts"
+          style="
+            width: 49%;
+            height: 400px;
+            margin-right: 10px;
+            float: right;
+            box-shadow: 0 2px 22px rgba(0, 0, 0, 0.12),
+              0 0 6px rgba(0, 0, 0, 0.06);
+          "
+        >
+          <div style="padding-left: 15px; padding-top: 3px">
+            <span style="font-weight: bolder">广告活动表现</span>
+            <span style="margin-left: 5px">
+              <el-tooltip type="primary" placement="top">
+                <div slot="content">
+                  广告活动销售额:面积(销售额越大面积越大)<br />ACOS:颜色(ACOS越大颜色越深)
+                </div>
                 <i class="el-icon-question"></i>
               </el-tooltip>
             </span>
           </div>
-          <div id="main" style="width: 49%;height:380px;text-align: center"></div>
-        </div>
+          <div id="main" style="height: 380px; text-align: center"></div>
+        </div> -->
       </el-row>
 
-      <el-row :gutter="30" style="margin-top: 10px;margin-left: 1px;margin-right: -7px;box-shadow: 0 2px 22px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .06)">
-        <el-radio-group v-model="queryParams.downloadType" @change="modifyData" style="margin-right: 20px;margin-bottom: 10px;">
+      <el-row class="mt-4 data_detail">
+        <el-card>
+          <div class="board-card_head flex justify-between items-center">
+            <div class="board-card_head_title ml-5 mt-5 mb-4">数据明细</div>
+            <div>
+              <el-button
+                type="text"
+                icon="el-icon-download"
+                size="mini"
+                @click="handleExport"
+                style="color: #333"
+                class="mr-4"
+                >导出</el-button
+              >
+            </div>
+          </div>
+          <el-table
+            v-loading="loading"
+            :data="tableList"
+            max-height="450"
+            header-row-class-name="table_header_class"
+          >
+            <el-table-column sortable label="日期" align="center" prop="dateSlot" />
+            <el-table-column sortable label="曝光量" align="center" prop="impressions" />
+            <el-table-column sortable label="点击量" align="center" prop="clicks" />
+            <el-table-column sortable label="点击率" align="center" prop="clickPercent">
+              <template slot-scope="scope">
+                <span v-if="scope.row != undefined">{{
+                  scope.row.clickPercent != null
+                    ? scope.row.clickPercent + "%"
+                    : "0%"
+                }}</span>
+                <span v-if="scope.row == undefined">0%</span>
+              </template>
+            </el-table-column>
+            <el-table-column :width="130" sortable label="点击均价（$）" align="center" prop="cpcFee" />
+            <el-table-column :width="130" sortable label="广告花费（$）" align="center" prop="fees" />
+            <el-table-column
+              :width="130"
+              label="销售额（$）"
+              align="center"
+              prop="salesFees"
+              sortable
+            />
+            <el-table-column
+              label="订单数"
+              align="center"
+              prop="orderQuantity"
+              sortable
+            />
+            <el-table-column sortable label="ACOS" align="center" prop="acos">
+              <template slot-scope="scope">
+                <span v-if="scope.row != undefined">{{
+                  scope.row.acos != null ? scope.row.acos + "%" : "0%"
+                }}</span>
+                <span v-if="scope.row == undefined">0%</span>
+              </template>
+            </el-table-column>
+            <el-table-column sortable label="TACOS" align="center" prop="tacos">
+              <template slot-scope="scope">
+                <span v-if="scope.row != undefined">{{
+                  scope.row.tacos != null ? scope.row.tacos + "%" : "0%"
+                }}</span>
+                <span v-if="scope.row == undefined">0%</span>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-card>
+        <!-- <el-radio-group
+          v-model="queryParams.downloadType"
+          @change="modifyData"
+          style="margin-right: 20px; margin-bottom: 10px"
+        >
           <el-radio-button label="1"> 每日 </el-radio-button>
           <el-radio-button label="2"> 每周 </el-radio-button>
           <el-radio-button label="3"> 每月 </el-radio-button>
-        </el-radio-group>
-        <el-button type="primary" icon="el-icon-download" size="mini" @click="handleExport" style="margin-bottom: 10px;">导出</el-button>
-        <el-table v-loading="loading" :data="tableList" max-height="450">
-          <el-table-column label="日期" align="center" prop="dateSlot" />
-          <el-table-column label="展示量" align="center" prop="impressions" />
-          <el-table-column label="点击量" align="center" prop="clicks" />
-          <el-table-column label="点击率" align="center" prop="clickPercent" >
-            <template slot-scope="scope">
-            <span v-if="scope.row != undefined">{{
-                scope.row.clickPercent != null
-                  ? scope.row.clickPercent + "%"
-                  : "0%"
-              }}</span>
-              <span v-if="scope.row == undefined">0%</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="CPC($)" align="center" prop="cpcFee" />
-          <el-table-column label="广告花费($)" align="center" prop="fees" />
-          <el-table-column label="广告销售额($)" align="center" prop="salesFees" />
-          <el-table-column label="ACOS" align="center" prop="acos" >
-            <template slot-scope="scope">
-            <span v-if="scope.row != undefined">{{
-                scope.row.acos != null
-                  ? scope.row.acos + "%"
-                  : "0%"
-              }}</span>
-              <span v-if="scope.row == undefined">0%</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="广告订单" align="center" prop="orderQuantity" />
-          <el-table-column label="TACOS" align="center" prop="tacos" >
-          <template slot-scope="scope">
-            <span v-if="scope.row != undefined">{{
-                scope.row.tacos != null
-                  ? scope.row.tacos + "%"
-                  : "0%"
-              }}</span>
-            <span v-if="scope.row == undefined">0%</span>
-          </template>
-          </el-table-column>
-        </el-table>
+        </el-radio-group> -->
       </el-row>
     </el-row>
-
-
   </div>
 </template>
 
 <script>
-import * as echarts from 'echarts';
-import { queryBiReport} from "@/api/amazon/campaignsinfo";
+import * as echarts from "echarts";
+import { mapState } from "vuex";
+import { queryBiReport } from "@/api/amazon/campaignsinfo";
 import { allAccount } from "@/api/amazon/account";
 import { accountCampaign } from "@/api/amazon/campaign";
+import SummaryMoneyLabel from "./summaryMoneyLabel";
+import dayjs from 'dayjs';
+import { Loading } from 'element-ui';
+var debounce = require("debounce");
 export default {
   name: "biReport",
+  components: {
+    SummaryMoneyLabel,
+  },
+  computed: {
+    ...mapState(["user"]),
+    userName() {
+      return this.$store.state.user.name;
+    },
+  },
   data() {
     return {
       pickerOptions: {
@@ -379,9 +448,9 @@ export default {
           },
         ],
       },
-      stateList:[
-        {value:'1',label:'开启'},
-        {value:"2",label:'关闭'}
+      stateList: [
+        { value: "1", label: "开启" },
+        { value: "2", label: "关闭" },
       ],
       // 遮罩层
       loading: true,
@@ -400,51 +469,60 @@ export default {
       monthTableList: [],
       accountList: [],
       campaignList: [],
-      batchPrice:false,
-      activityBudget:false,
-      popName:undefined,
-      totalFees:0,
-      totalSales:0,
-      totalSalesFees:0,
-      totalAcos:0,
-      totalRoas:0,
-      totalTacos:0,
-      totalClicks:0,
-      totalImpressions:0,
-      totalClickPercent:0,
-      totalCpc:0,
-      dayList:[],
-      salesList:[],
-      feesList:[],
-      acosList:[],
-      tacosList:[],
-      impressionsList:[],
-      clicksList:[],
-      clickPercentList:[],
-      cpcFeeList:[],
-      expressionList:[],
-      main: '',
-      mainOne: '',
-      mainTwo: '',
-      mainThree: '',
-      mainFour: '',
-      mainFive: '',
-      mainSix: '',
-      mainSeven: '',
-      mainEight: '',
-      activeNameOne:'first',
-      activeNameTwo:'first',
-      activeNameThree:'first',
+      batchPrice: false,
+      activityBudget: false,
+      popName: undefined,
+      totalFees: 0,
+      totalSales: 0,
+      totalSalesFees: 0,
+      totalAcos: 0,
+      totalRoas: 0,
+      totalTacos: 0,
+      totalClicks: 0,
+      totalImpressions: 0,
+      totalClickPercent: 0,
+      totalCpc: 0,
+      dayList: [],
+      salesList: [],
+      feesList: [],
+      acosList: [],
+      tacosList: [],
+      impressionsList: [],
+      clicksList: [],
+      clickPercentList: [],
+      cpcFeeList: [],
+      expressionList: [],
+      main: "",
+      mainOne: "",
+      mainTwo: "",
+      mainThree: "",
+      mainFour: "",
+      mainFive: "",
+      mainSix: "",
+      mainSeven: "",
+      mainEight: "",
+      activeNameOne: "first",
+      activeNameTwo: "first",
+      activeNameThree: "first",
       // 查询参数
       queryParams: {
-        shopId:undefined,
-        campaignId:undefined,
-        campaignName:undefined,
+        shopId: undefined,
+        campaignId: undefined,
+        campaignName: undefined,
         startDate: undefined,
         endDate: undefined,
         dateTime: undefined,
-        downloadType:1
+        downloadType: 1,
       },
+      payBoardGroup: ["销售额"],
+      adEffectGroup: ["曝光量"],
+      currentTime: [],
+      datePreset: {
+        LAST_DAY: 'LAST_DAY',
+        LAST_7_DAY: 'LAST_7_DAY',
+        LAST_30_DAY: 'LAST_30_DAY',
+        LAST_90_DAY: 'LAST_90_DAY',
+      }
     };
   },
   created() {
@@ -457,11 +535,173 @@ export default {
     this.queryParams.endDate = time2;
     this.queryParams.dateTime = [time1, time2];
     this.allAccountList();
-    this.loading=false;
+    this.loading = false;
+    const that = this;
+    window.addEventListener(
+      "resize",
+      debounce(() => {
+        that.resizeCharts(that);
+      })
+    );
     //this.initTime();
-
   },
   methods: {
+    changeDate(dateType) {
+      switch(dateType) {
+        case this.datePreset.LAST_DAY:
+          this.queryParams.dateTime = [dayjs().subtract(1, 'day').startOf('day').format('YYYY-MM-DD'), dayjs().endOf('day').format('YYYY-MM-DD')];
+          break;
+        case this.datePreset.LAST_7_DAY:
+          this.queryParams.dateTime = [dayjs().subtract(7, 'day').startOf('day').format('YYYY-MM-DD'), dayjs().endOf('day').format('YYYY-MM-DD')];
+          break;
+        case this.datePreset.LAST_30_DAY:
+          this.queryParams.dateTime = [dayjs().subtract(30, 'day').startOf('day').format('YYYY-MM-DD'), dayjs().endOf('day').format('YYYY-MM-DD')];
+          break;
+        case this.datePreset.LAST_90_DAY:
+          this.queryParams.dateTime = [dayjs().subtract(90, 'day').startOf('day').format('YYYY-MM-DD'), dayjs().endOf('day').format('YYYY-MM-DD')];
+          break;
+      }
+
+      this.queryEcharts();
+    },
+    resizeCharts: (self) => {
+      if (self.main) {
+        self.main.resize();
+      }
+      if (self.mainOne) {
+        console.log(111);
+        self.mainOne.resize();
+      }
+
+      if (self.mainTwo) {
+        self.mainTwo.resize();
+      }
+    },
+    handlePayBoardGroupChange(val) {
+      if (this.payBoardGroup.length === 3) {
+        this.payBoardGroup.shift();
+      }
+
+      let params = {
+        y: [],
+        series: [],
+      };
+      this.payBoardGroup.forEach((v) => {
+        if (v === "销售额") {
+          params.y.push({
+            type: "value",
+          });
+          params.series.push({
+            data: this.salesList,
+            type: "line",
+            name: "销售额",
+          });
+        } else if (v === "广告花费") {
+          params.y.push({
+            type: "value",
+          });
+          params.series.push({
+            data: this.feesList,
+            type: "line",
+            name: "广告花费",
+          });
+        } else if (v === "ACOS") {
+          params.y.push({
+            type: "value",
+            axisLabel: {
+              formatter: "{value} %",
+            },
+          });
+          params.series.push({
+            data: this.acosList,
+            type: "line",
+            name: "ACOS",
+          });
+        } else if (v === "TACOS") {
+          params.y.push({
+            type: "value",
+            axisLabel: {
+              formatter: "{value} %",
+            },
+          });
+          params.series.push({
+            data: this.tacosList,
+            type: "line",
+            name: "TACOS",
+          });
+        }
+      });
+
+      if (this.payBoardGroup.length === 2) {
+        params.y[1].position = "right";
+        params.series[1].yAxisIndex = 1;
+      }
+
+      params.legend = params.series.map((s) => s.name);
+      console.log(params);
+      this.myEchartsOne(params);
+    },
+    handleAdEffectGroupChange(val) {
+      if (this.adEffectGroup.length === 3) {
+        this.adEffectGroup.shift();
+      }
+
+      let params = {
+        y: [],
+        series: [],
+      };
+      this.adEffectGroup.forEach((v) => {
+        if (v === "曝光量") {
+          params.y.push({
+            type: "value",
+          });
+          params.series.push({
+            data: this.impressionsList,
+            type: "line",
+            name: "曝光量",
+          });
+        } else if (v === "点击量") {
+          params.y.push({
+            type: "value",
+          });
+          params.series.push({
+            data: this.clicksList,
+            type: "line",
+            name: "点击量",
+          });
+        } else if (v === "点击率") {
+          params.y.push({
+            type: "value",
+            axisLabel: {
+              formatter: "{value} %",
+            },
+          });
+          params.series.push({
+            data: this.clickPercentList,
+            type: "line",
+            name: "点击率",
+          });
+        } else if (v === "CPC") {
+          params.y.push({
+            type: "value",
+          });
+          params.series.push({
+            data: this.cpcFeeList,
+            type: "line",
+            name: "CPC",
+          });
+        }
+      });
+
+      if (this.adEffectGroup.length === 2) {
+        params.y[1].position = "right";
+        params.series[1].yAxisIndex = 1;
+      }
+
+      params.legend = params.series.map((s) => s.name);
+      console.log(params);
+      this.myEchartsTwo(params);
+    },
     formatNums(num) {
       num = num.toString().split("."); // 分隔小数点
       var arr = num[0].split("").reverse(); // 转换成字符数组并且倒序排列
@@ -481,13 +721,13 @@ export default {
       }
       return res;
     },
-    formatState(row, column, cellValue, index){
-      for(let i=0; i<this.stateList.length;i++){
-        if(cellValue == this.stateList[i].value){
+    formatState(row, column, cellValue, index) {
+      for (let i = 0; i < this.stateList.length; i++) {
+        if (cellValue == this.stateList[i].value) {
           return this.stateList[i].label;
         }
       }
-      return '';
+      return "";
     },
     initTime() {
       const now = new Date();
@@ -498,16 +738,17 @@ export default {
       this.queryParams.dateTime = [time1, time2];
       this.queryParams.startDate = this.queryParams.dateTime[0];
       this.queryParams.endDate = this.queryParams.dateTime[1];
-      this.getTime()
+      this.getTime();
     },
     allAccountList() {
+      this.currentTime = [...this.queryParams.dateTime];
       allAccount().then((response) => {
         this.accountList = response.data;
         if (this.accountList != null && this.accountList.length > 0) {
           this.queryParams.shopId = this.accountList[0].id;
           this.$nextTick(() => {
             this.queryEcharts();
-          })
+          });
         }
       });
     },
@@ -523,15 +764,16 @@ export default {
         this.queryParams.endDate = null;
       }
     },
-    queryEcharts(){
+    queryEcharts() {
+      let loadingInstance = Loading.service({ fullscreen: true });
       this.queryParams.downloadType = 1;
-      this.activeNameOne = 'first';
-      this.activeNameTwo = 'first';
-      this.activeNameThree = 'first';
-
-
+      this.activeNameOne = "first";
+      this.activeNameTwo = "first";
+      this.activeNameThree = "first";
+      this.queryParams.startDate = this.queryParams.dateTime[0];
+      this.queryParams.endDate = this.queryParams.dateTime[1];
       queryBiReport(this.queryParams).then((response) => {
-        if (response.data.chartTotalResponseDto != null){
+        if (response.data.chartTotalResponseDto != null) {
           this.totalFees = response.data.chartTotalResponseDto.fees;
           this.totalSales = response.data.chartTotalResponseDto.sales;
           this.totalSalesFees = response.data.chartTotalResponseDto.salesFees;
@@ -539,14 +781,16 @@ export default {
           this.totalRoas = response.data.chartTotalResponseDto.roas;
           this.totalTacos = response.data.chartTotalResponseDto.tacos;
           this.totalClicks = response.data.chartTotalResponseDto.clicks;
-          this.totalImpressions = response.data.chartTotalResponseDto.impressions;
-          this.totalClickPercent = response.data.chartTotalResponseDto.clickPercent;
+          this.totalImpressions =
+            response.data.chartTotalResponseDto.impressions;
+          this.totalClickPercent =
+            response.data.chartTotalResponseDto.clickPercent;
           this.totalCpc = response.data.chartTotalResponseDto.cpcFee;
         }
-        if (response.data.dailyDate != null){
+        if (response.data.dailyDate != null) {
           this.dayList = response.data.dailyDate;
         }
-        if (response.data != null){
+        if (response.data != null) {
           this.salesList = response.data.salesFeesList;
           this.feesList = response.data.feesList;
           this.acosList = response.data.acosList;
@@ -560,79 +804,108 @@ export default {
           this.dayTableList = response.data.dailyResponseDtoList;
           this.weekTableList = response.data.weeklyResponseDtoList;
           this.monthTableList = response.data.monthlyResponseDtoList;
-          if (response.data.campaignDailyResponseDtoList != null && response.data.campaignDailyResponseDtoList.length>0){
+          if (
+            response.data.campaignDailyResponseDtoList != null &&
+            response.data.campaignDailyResponseDtoList.length > 0
+          ) {
             this.expressionList = [];
-            response.data.campaignDailyResponseDtoList.forEach((column, index) => {
-              let expressionData = {
-                name: column.campaignName,
-                value: column.saleFees,
-                fees:column.fees,
-                acos:column.acos,
-                itemStyle: {
-                  color: column.color
-                },
-              };
-              this.expressionList.push(expressionData);
-            });
+            response.data.campaignDailyResponseDtoList.forEach(
+              (column, index) => {
+                let expressionData = {
+                  name: column.campaignName,
+                  value: column.saleFees,
+                  fees: column.fees,
+                  acos: column.acos,
+                  itemStyle: {
+                    color: this.getMaticTreeColor(column),
+                  },
+                };
+                this.expressionList.push(expressionData);
+              }
+            );
           }
         }
         this.myEcharts();
-        this.myEchartsOne();
+        this.handlePayBoardGroupChange();
+        this.handleAdEffectGroupChange();
+        loadingInstance.close();
         //this.myEchartsTwo();
-        this.myEchartsThree();
+        // this.myEchartsThree();
         //this.myEchartsFour();
-        this.myEchartsFive();
+        // this.myEchartsFive();
         //this.myEchartsSix();
         //this.myEchartsSeven();
         //this.myEchartsEight();
       });
-
+    },
+    getMaticTreeColor(item) {
+      if (item.acos <= 10) {
+        return "#3D76DD";
+      } else if (item.acos <= 20) {
+        return "#5B8FF9";
+      } else if (item.acos <= 30) {
+        return "#7DAAFF";
+      } else if (item.acos <= 40) {
+        return "#9AC5FF";
+      } else if (item.acos <= 50) {
+        return "#BFD9FF";
+      } else if (item.acos <= 60) {
+        return "#DEE7FF";
+      } else if (item.acos <= 70) {
+        return "#FFC5AC";
+      } else if (item.acos <= 80) {
+        return "#FF895D";
+      } else if (item.acos <= 90) {
+        return "#F3470D";
+      } else {
+        return "#D13808";
+      }
     },
     //切换标签页时触发
     handleClick(tab, event) {
-      if (tab.index == 1){
+      if (tab.index == 1) {
         this.$nextTick(() => {
           this.myEchartsTwo();
-        })
+        });
       }
     },
     handleClickTwo(tab, event) {
-      if (tab.index == 1){
+      if (tab.index == 1) {
         this.$nextTick(() => {
           this.myEchartsFour();
-        })
+        });
       }
     },
     handleClickThree(tab, event) {
-      if (tab.index == 1){
+      if (tab.index == 1) {
         this.$nextTick(() => {
           this.myEchartsSix();
-        })
-      }else if (tab.index == 2){
+        });
+      } else if (tab.index == 2) {
         this.$nextTick(() => {
           this.myEchartsSeven();
-        })
-      }else if (tab.index == 3){
+        });
+      } else if (tab.index == 3) {
         this.$nextTick(() => {
           this.myEchartsEight();
-        })
+        });
       }
     },
-    modifyData(){
-      if (this.queryParams.downloadType == 1){
+    modifyData() {
+      if (this.queryParams.downloadType == 1) {
         this.tableList = this.dayTableList;
-      }else if (this.queryParams.downloadType == 2){
+      } else if (this.queryParams.downloadType == 2) {
         this.tableList = this.weekTableList;
-      }else if (this.queryParams.downloadType == 3){
+      } else if (this.queryParams.downloadType == 3) {
         this.tableList = this.monthTableList;
       }
     },
     /** 导出按钮操作 */
     handleExport() {
       let dayName = "每日";
-      if (this.queryParams.downloadType == 2){
+      if (this.queryParams.downloadType == 2) {
         dayName = "每周";
-      }else if (this.queryParams.downloadType == 3){
+      } else if (this.queryParams.downloadType == 3) {
         dayName = "每月";
       }
       this.download(
@@ -646,345 +919,378 @@ export default {
     myEcharts() {
       this.main = this.$echarts.init(document.getElementById("main"));
       var option = {
-        grid:{
-          x:0,
-          x2:0,
-          y:0,
-          y2:10
+        grid: {
+          x: 0,
+          x2: 0,
+          y: 0,
+          y2: 10,
+        },
+        legend: {
+          show: false,
         },
         tooltip: {
           enterable: true, // 设置可移入气泡
-          trigger: 'item',
-          position: ['50%', '30%'],
-          textStyle:{
-            align:'left'
+          trigger: "item",
+          position: ["50%", "30%"],
+          backgroundColor: "rgba(255, 255, 255,.95)",
+          borderColor: "rgba(32, 33, 36,0.20)",
+          textStyle: {
+            align: "left",
+            // 文字提示样式
+            color: "#666",
+            fontSize: "12",
           },
           formatter: function (info) {
-            if (info.data.name == undefined){
-              return '';
+            if (info.data.name == undefined) {
+              return "";
             }
             return [
-              '<div>' + ' 广告活动名称：'+info.data.name+'</div>',
-              '<div>' + ' 总销售额($)：'+ info.data.value +'</div>',
-              '<div>' + ' 花费($)：'+ info.data.fees +'</div>',
-              '<div>' + ' ACOS-广告活动：'+ info.data.acos +'%</div>'
-            ].join('');
-          }
+              "<div>" + info.data.name + "</div>",
+              "<div>" +
+                " <div class='w-28 inline-block mb-1'>总销售额($)：</div>" +
+                info.data.value +
+                "</div>",
+              "<div>" +
+                " <div class='w-28 inline-block mb-1'>花费($)：</div>" +
+                info.data.fees +
+                "</div>",
+              "<div>" +
+                "<div class='w-28 inline-block'>ACOS-广告活动：</div>" +
+                info.data.acos +
+                "%</div>",
+            ].join("");
+          },
         },
         series: [
           {
-            type: 'treemap',
+            type: "treemap",
+            breadcrumb: {
+              show: false,
+            },
             data: [
               {
-                name: '广告活动表现',
+                name: "广告活动表现",
                 value: this.totalSalesFees,
-                children: this.expressionList
-              }
-            ]
-          }
-        ]
+                children: this.expressionList,
+              },
+            ],
+          },
+        ],
       };
       this.main.setOption(option);
     },
-    myEchartsOne() {
-      this.mainOne = this.$echarts.init(document.getElementById("mainOne"));
+    myEchartsOne(params) {
+      if (!this.mainOne) {
+        this.mainOne = this.$echarts.init(document.getElementById("mainOne"));
+      }
+      console.log(params.y);
       var option = {
-        grid:{
-          x:60,
-          x2:20,
-          y:20,
-          y2:20,
+        grid: {
+          y: 20,
         },
         tooltip: {
-          trigger: 'axis',
-          backgroundColor: 'rgba(32, 33, 36,.7)',
-          borderColor: 'rgba(32, 33, 36,0.20)',
+          trigger: "axis",
+          backgroundColor: "rgba(255, 255, 255,.95)",
+          borderColor: "rgba(32, 33, 36,0.20)",
           borderWidth: 1,
-          textStyle: { // 文字提示样式
-            color: '#fff',
-            fontSize: '22'
+          textStyle: {
+            // 文字提示样式
+            color: "#666",
+            fontSize: "12",
           },
         },
         xAxis: {
-          type: 'category',
-          data: this.dayList
+          type: "category",
+          data: this.dayList,
         },
-        yAxis: {
-          type: 'value'
+        yAxis: params.y,
+        series: params.series,
+        color: ["#246EFF", "#FF6505"],
+        legend: {
+          data: params.legend,
+          bottom: 0,
         },
-        series: [
-          {
-            data: this.salesList,
-            type: 'line'
-          }
-        ]
       };
-      this.mainOne.setOption(option);
+      this.mainOne.clear();
+      if (params.series.length) {
+        this.$nextTick(() => {
+          this.mainOne.setOption(option);
+        });
+      }
     },
-    myEchartsTwo() {
-      this.mainTwo = this.$echarts.init(document.getElementById("mainTwo"));
+    myEchartsTwo(params) {
+      if (!this.mainTwo) {
+        this.mainTwo = this.$echarts.init(document.getElementById("mainTwo"));
+      }
+      console.log(params.y);
       var option = {
-        grid:{
-          x:60,
-          x2:20,
-          y:20,
-          y2:20,
+        grid: {
+          y: 20,
         },
         tooltip: {
-          trigger: 'axis',
-          backgroundColor: 'rgba(32, 33, 36,.7)',
-          borderColor: 'rgba(32, 33, 36,0.20)',
+          trigger: "axis",
+          backgroundColor: "rgba(255, 255, 255,.95)",
+          borderColor: "rgba(32, 33, 36,0.20)",
           borderWidth: 1,
-          textStyle: { // 文字提示样式
-            color: '#fff',
-            fontSize: '22'
+          textStyle: {
+            // 文字提示样式
+            color: "#666",
+            fontSize: "12",
           },
         },
         xAxis: {
-          type: 'category',
-          data: this.dayList
+          type: "category",
+          data: this.dayList,
         },
-        yAxis: {
-          type: 'value'
+        yAxis: params.y,
+        series: params.series,
+        color: ["#246EFF", "#FF6505"],
+        legend: {
+          data: params.legend,
+          bottom: 0,
         },
-        series: [
-          {
-            data: this.feesList,
-            type: 'line'
-          }
-        ]
       };
-      this.mainTwo.setOption(option);
+      this.mainTwo.clear();
+      if (params.series.length) {
+        this.$nextTick(() => {
+          this.mainTwo.setOption(option);
+        });
+      }
     },
     myEchartsThree() {
       this.mainThree = this.$echarts.init(document.getElementById("mainThree"));
       var option = {
-        grid:{
-          x:60,
-          x2:20,
-          y:20,
-          y2:20,
+        grid: {
+          x: 60,
+          x2: 20,
+          y: 20,
+          y2: 20,
         },
         tooltip: {
-          trigger: 'axis',
-          backgroundColor: 'rgba(32, 33, 36,.7)',
-          borderColor: 'rgba(32, 33, 36,0.20)',
+          trigger: "axis",
+          backgroundColor: "rgba(32, 33, 36,.7)",
+          borderColor: "rgba(32, 33, 36,0.20)",
           borderWidth: 1,
-          textStyle: { // 文字提示样式
-            color: '#fff',
-            fontSize: '22'
+          textStyle: {
+            // 文字提示样式
+            color: "#fff",
+            fontSize: "22",
           },
           formatter: function (params) {
-            var relVal = params[0].name
+            var relVal = params[0].name;
             for (var i = 0, l = params.length; i < l; i++) {
-              relVal += '<br/>' + params[i].marker + params[i].value + '%'
+              relVal += "<br/>" + params[i].marker + params[i].value + "%";
             }
             return relVal;
-          }
+          },
         },
         xAxis: {
-          type: 'category',
-          data: this.dayList
+          type: "category",
+          data: this.dayList,
         },
         yAxis: {
-          type: 'value'
+          type: "value",
         },
         series: [
           {
             data: this.acosList,
-            type: 'line'
-          }
-        ]
+            type: "line",
+          },
+        ],
       };
       this.mainThree.setOption(option);
-
     },
     myEchartsFour() {
       this.mainFour = this.$echarts.init(document.getElementById("mainFour"));
       var option = {
-        grid:{
-          x:60,
-          x2:20,
-          y:20,
-          y2:20,
+        grid: {
+          x: 60,
+          x2: 20,
+          y: 20,
+          y2: 20,
         },
         tooltip: {
-          trigger: 'axis',
-          backgroundColor: 'rgba(32, 33, 36,.7)',
-          borderColor: 'rgba(32, 33, 36,0.20)',
+          trigger: "axis",
+          backgroundColor: "rgba(32, 33, 36,.7)",
+          borderColor: "rgba(32, 33, 36,0.20)",
           borderWidth: 1,
-          textStyle: { // 文字提示样式
-            color: '#fff',
-            fontSize: '22'
+          textStyle: {
+            // 文字提示样式
+            color: "#fff",
+            fontSize: "22",
           },
           formatter: function (params) {
-            var relVal = params[0].name
+            var relVal = params[0].name;
             for (var i = 0, l = params.length; i < l; i++) {
-              relVal += '<br/>' + params[i].marker + params[i].value + '%'
+              relVal += "<br/>" + params[i].marker + params[i].value + "%";
             }
             return relVal;
-          }
+          },
         },
         xAxis: {
-          type: 'category',
-          data: this.dayList
+          type: "category",
+          data: this.dayList,
         },
         yAxis: {
-          type: 'value'
+          type: "value",
         },
         series: [
           {
             data: this.tacosList,
-            type: 'line'
-          }
-        ]
+            type: "line",
+          },
+        ],
       };
       this.mainFour.setOption(option);
     },
     myEchartsFive() {
       this.mainFive = this.$echarts.init(document.getElementById("mainFive"));
       var option = {
-        grid:{
-          x:60,
-          x2:20,
-          y:20,
-          y2:20,
+        grid: {
+          x: 60,
+          x2: 20,
+          y: 20,
+          y2: 20,
         },
         tooltip: {
-          trigger: 'axis',
-          backgroundColor: 'rgba(32, 33, 36,.7)',
-          borderColor: 'rgba(32, 33, 36,0.20)',
+          trigger: "axis",
+          backgroundColor: "rgba(32, 33, 36,.7)",
+          borderColor: "rgba(32, 33, 36,0.20)",
           borderWidth: 1,
-          textStyle: { // 文字提示样式
-            color: '#fff',
-            fontSize: '22'
+          textStyle: {
+            // 文字提示样式
+            color: "#fff",
+            fontSize: "22",
           },
         },
         xAxis: {
-          type: 'category',
-          data: this.dayList
+          type: "category",
+          data: this.dayList,
         },
         yAxis: {
-          type: 'value'
+          type: "value",
         },
         series: [
           {
             data: this.impressionsList,
-            type: 'line'
-          }
-        ]
+            type: "line",
+          },
+        ],
       };
       this.mainFive.setOption(option);
     },
     myEchartsSix() {
       this.mainSix = this.$echarts.init(document.getElementById("mainSix"));
       var option = {
-        grid:{
-          x:60,
-          x2:20,
-          y:20,
-          y2:20,
+        grid: {
+          x: 60,
+          x2: 20,
+          y: 20,
+          y2: 20,
         },
         tooltip: {
-          trigger: 'axis',
-          backgroundColor: 'rgba(32, 33, 36,.7)',
-          borderColor: 'rgba(32, 33, 36,0.20)',
+          trigger: "axis",
+          backgroundColor: "rgba(32, 33, 36,.7)",
+          borderColor: "rgba(32, 33, 36,0.20)",
           borderWidth: 1,
-          textStyle: { // 文字提示样式
-            color: '#fff',
-            fontSize: '22'
+          textStyle: {
+            // 文字提示样式
+            color: "#fff",
+            fontSize: "22",
           },
         },
         xAxis: {
-          type: 'category',
-          data: this.dayList
+          type: "category",
+          data: this.dayList,
         },
         yAxis: {
-          type: 'value'
+          type: "value",
         },
         series: [
           {
             data: this.clicksList,
-            type: 'line'
-          }
-        ]
+            type: "line",
+          },
+        ],
       };
       this.mainSix.setOption(option);
     },
     myEchartsSeven() {
       this.mainSeven = this.$echarts.init(document.getElementById("mainSeven"));
       var option = {
-        grid:{
-          x:60,
-          x2:20,
-          y:20,
-          y2:20,
+        grid: {
+          x: 60,
+          x2: 20,
+          y: 20,
+          y2: 20,
         },
         tooltip: {
-          trigger: 'axis',
-          backgroundColor: 'rgba(32, 33, 36,.7)',
-          borderColor: 'rgba(32, 33, 36,0.20)',
+          trigger: "axis",
+          backgroundColor: "rgba(32, 33, 36,.7)",
+          borderColor: "rgba(32, 33, 36,0.20)",
           borderWidth: 1,
-          textStyle: { // 文字提示样式
-            color: '#fff',
-            fontSize: '22'
+          textStyle: {
+            // 文字提示样式
+            color: "#fff",
+            fontSize: "22",
           },
           formatter: function (params) {
-            var relVal = params[0].name
+            var relVal = params[0].name;
             for (var i = 0, l = params.length; i < l; i++) {
-              relVal += '<br/>' + params[i].marker + params[i].value + '%'
+              relVal += "<br/>" + params[i].marker + params[i].value + "%";
             }
             return relVal;
-          }
+          },
         },
         xAxis: {
-          type: 'category',
-          data: this.dayList
+          type: "category",
+          data: this.dayList,
         },
         yAxis: {
-          type: 'value'
+          type: "value",
         },
         series: [
           {
             data: this.clickPercentList,
-            type: 'line'
-          }
-        ]
+            type: "line",
+          },
+        ],
       };
       this.mainSeven.setOption(option);
     },
     myEchartsEight() {
       this.mainEight = this.$echarts.init(document.getElementById("mainEight"));
       var option = {
-        grid:{
-          x:60,
-          x2:20,
-          y:20,
-          y2:20,
+        grid: {
+          x: 60,
+          x2: 20,
+          y: 20,
+          y2: 20,
         },
         tooltip: {
-          trigger: 'axis',
-          backgroundColor: 'rgba(32, 33, 36,.7)',
-          borderColor: 'rgba(32, 33, 36,0.20)',
+          trigger: "axis",
+          backgroundColor: "rgba(32, 33, 36,.7)",
+          borderColor: "rgba(32, 33, 36,0.20)",
           borderWidth: 1,
-          textStyle: { // 文字提示样式
-            color: '#fff',
-            fontSize: '22'
+          textStyle: {
+            // 文字提示样式
+            color: "#fff",
+            fontSize: "22",
           },
         },
         xAxis: {
-          type: 'category',
-          data: this.dayList
+          type: "category",
+          data: this.dayList,
         },
         yAxis: {
-          type: 'value'
+          type: "value",
         },
         series: [
           {
             data: this.cpcFeeList,
-            type: 'line'
-          }
-        ]
+            type: "line",
+          },
+        ],
       };
       this.mainEight.setOption(option);
     },
@@ -996,24 +1302,112 @@ export default {
     /** 重置按钮操作 */
     resetQuery() {
       this.handleQuery();
-    }
-  }
+    },
+    getTreeMapColor(acos) {},
+  },
 };
 </script>
 
 <style lang="scss" scoped>
-
 ::v-deep .el-tabs__item {
   height: 70px !important;
 }
-::v-deep .el-card__body{
-  padding:0px 10px 10px 10px !important;
+::v-deep .el-card__body {
+  padding: 0px 10px 10px 10px !important;
 }
 .el-col-lg-4-8 {
   width: 20%;
 }
-*{
+* {
   -webkit-user-select: text !important;
   user-select: text !important;
+}
+.summary {
+  padding-top: 20px;
+  padding-left: 20px;
+}
+.summary_title {
+  font-family: "PingFang SC";
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  color: #666666;
+}
+.summary_value {
+  font-family: "DIN Alternate";
+  font-style: normal;
+  font-weight: 700;
+  font-size: 40px;
+  line-height: 150%;
+  color: #1d2129;
+}
+.board-card_head_title {
+  font-family: "PingFang SC";
+  font-style: normal;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 24px;
+}
+.board-card_head_date {
+  font-family: "PingFang SC";
+  font-style: normal;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 20px;
+  color: #8c8c8c;
+}
+.matric-tree_title {
+  font-family: "PingFang SC";
+  font-style: normal;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 17px;
+  color: #333333;
+}
+.matric-tree_bar {
+  width: 120px;
+  height: 12px;
+  background: linear-gradient(
+    90deg,
+    #d13808 5%,
+    #f3470d 15%,
+    #ff895d 24.52%,
+    #ffc5ac 34.63%,
+    #dee7ff 44.7%,
+    #bfd9ff 54.74%,
+    #9ac5ff 64.82%,
+    #7daaff 74.89%,
+    #5b8ff9 84.95%,
+    #3d76dd 95%
+  );
+  transform: matrix(1, 0, 0, -1, 0, 0);
+}
+.matric-tree_bar-wrapper {
+  color: #888888;
+  font-family: "PingFang SC";
+  font-style: normal;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 17px;
+}
+.table_header_class {
+  background: #fff;
+}
+</style>
+
+<style>
+.dashboard_search-item .el-input--small .el-input__inner {
+  border: none;
+  font-size: 12px;
+}
+.data_detail .el-table .el-table__header-wrapper th {
+  background: #fff;
+  font-family: "PingFang SC";
+  font-style: normal;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 150%;
+  color: #666666;
 }
 </style>

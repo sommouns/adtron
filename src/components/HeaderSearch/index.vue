@@ -1,6 +1,8 @@
 <template>
-  <div :class="{'show':show}" class="header-search">
-    <svg-icon class-name="search-icon" icon-class="search" @click.stop="click" />
+  <div :class="{'show':show}" class="header-search flex">
+    <div @click.stop="click" class="flex items-center justify-center" style="background: #F5F6F8; height: 28px; width: 28px; border-radius: 50%;">
+      <svg-icon style="height: 12px; width: 12px; display: block" class-name="search-icon" icon-class="search" />
+    </div>
     <el-select
       ref="headerSearchSelect"
       v-model="search"
