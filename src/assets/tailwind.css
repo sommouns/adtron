@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+img, svg, video, canvas, audio, iframe, embed, object {
+    display: inline-block;
+}
+
+@font-face {
+    font-family: 'DIN Alternate';
+    src: url('../assets/font/D-DIN.otf');
+    font-weight: normal;
+    font-style: normal;
+}
