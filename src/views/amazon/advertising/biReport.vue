@@ -136,7 +136,14 @@
 
     <el-row :gutter="3" class="analysis">
       <el-card class="box-card">
-        <div class="flex">
+        <div class="flex relative">
+          <div
+            @click="toggleOpen"
+            class="openCloseTag absolute right-0 top-6 cursor-pointer"
+          >
+            {{ !isOpen ? "展开" : "收起" }}
+            <i :class="isOpen ? 'el-icon-arrow-up' : 'el-icon-arrow-down'"></i>
+          </div>
           <div class="flex-1 summary">
             <div class="summary_title">广告花费</div>
             <div class="summary_value">
@@ -166,22 +173,22 @@
             <div class="summary_value">{{ this.totalTacos }}%</div>
           </div>
         </div>
-        <div class="flex">
+        <div class="flex" v-show="isOpen">
           <div class="flex-1 summary">
             <div class="summary_title">曝光量</div>
             <div class="summary_value">
-              {{ this.totalImpressions }}
+              {{ this.formatNums(this.totalImpressions) }}
             </div>
           </div>
           <div class="flex-1 summary">
             <div class="summary_title">点击量</div>
             <div class="summary_value">
-              {{ this.totalImpressions }}
+              {{ this.formatNums(this.totalClicks) }}
             </div>
           </div>
           <div class="flex-1 summary">
             <div class="summary_title">点击率</div>
-            <div class="summary_value">{{ this.totalClicks }}%</div>
+            <div class="summary_value">{{ this.totalClickPercent }}%</div>
           </div>
           <div class="flex-1 summary">
             <div class="summary_title">CPC</div>
@@ -267,7 +274,9 @@
                 托管广告活动销售额Top10
               </div>
             </div>
-            <div class="mb-2"></div>
+            <div class="mb-2">
+              <div id="top10Compaign" style="height: 265px"></div>
+            </div>
           </el-col>
         </el-card>
         <!-- <div
@@ -301,6 +310,16 @@
           <div class="board-card_head flex justify-between items-center">
             <div class="board-card_head_title ml-5 mt-5 mb-4">数据明细</div>
             <div>
+              <el-radio-group
+                v-model="queryParams.downloadType"
+                @change="modifyData"
+                size="mini"
+                class="mr-2"
+              >
+                <el-radio-button label="1"> 每日 </el-radio-button>
+                <el-radio-button label="2"> 每周 </el-radio-button>
+                <el-radio-button label="3"> 每月 </el-radio-button>
+              </el-radio-group>
               <el-button
                 type="text"
                 icon="el-icon-download"
@@ -318,10 +337,30 @@
             max-height="450"
             header-row-class-name="table_header_class"
           >
-            <el-table-column sortable label="日期" align="center" prop="dateSlot" />
-            <el-table-column sortable label="曝光量" align="center" prop="impressions" />
-            <el-table-column sortable label="点击量" align="center" prop="clicks" />
-            <el-table-column sortable label="点击率" align="center" prop="clickPercent">
+            <el-table-column
+              sortable
+              label="日期"
+              align="center"
+              prop="dateSlot"
+            />
+            <el-table-column
+              sortable
+              label="曝光量"
+              align="center"
+              prop="impressions"
+            />
+            <el-table-column
+              sortable
+              label="点击量"
+              align="center"
+              prop="clicks"
+            />
+            <el-table-column
+              sortable
+              label="点击率"
+              align="center"
+              prop="clickPercent"
+            >
               <template slot-scope="scope">
                 <span v-if="scope.row != undefined">{{
                   scope.row.clickPercent != null
@@ -331,8 +370,20 @@
                 <span v-if="scope.row == undefined">0%</span>
               </template>
             </el-table-column>
-            <el-table-column :width="130" sortable label="点击均价（$）" align="center" prop="cpcFee" />
-            <el-table-column :width="130" sortable label="广告花费（$）" align="center" prop="fees" />
+            <el-table-column
+              :width="130"
+              sortable
+              label="点击均价（$）"
+              align="center"
+              prop="cpcFee"
+            />
+            <el-table-column
+              :width="130"
+              sortable
+              label="广告花费（$）"
+              align="center"
+              prop="fees"
+            />
             <el-table-column
               :width="130"
               label="销售额（$）"
@@ -364,15 +415,6 @@
             </el-table-column>
           </el-table>
         </el-card>
-        <!-- <el-radio-group
-          v-model="queryParams.downloadType"
-          @change="modifyData"
-          style="margin-right: 20px; margin-bottom: 10px"
-        >
-          <el-radio-button label="1"> 每日 </el-radio-button>
-          <el-radio-button label="2"> 每周 </el-radio-button>
-          <el-radio-button label="3"> 每月 </el-radio-button>
-        </el-radio-group> -->
       </el-row>
     </el-row>
   </div>
@@ -381,12 +423,13 @@
 <script>
 import * as echarts from "echarts";
 import { mapState } from "vuex";
-import { queryBiReport } from "@/api/amazon/campaignsinfo";
+import { queryBiReport, queryTop10Campaign } from "@/api/amazon/campaignsinfo";
 import { allAccount } from "@/api/amazon/account";
 import { accountCampaign } from "@/api/amazon/campaign";
 import SummaryMoneyLabel from "./summaryMoneyLabel";
-import dayjs from 'dayjs';
-import { Loading } from 'element-ui';
+import dayjs from "dayjs";
+import { Loading } from "element-ui";
+import { getInterval } from "./chartInterval";
 var debounce = require("debounce");
 export default {
   name: "biReport",
@@ -452,8 +495,11 @@ export default {
         { value: "1", label: "开启" },
         { value: "2", label: "关闭" },
       ],
+      top10Compaign: [],
       // 遮罩层
       loading: true,
+      isOpen: false,
+      top10ChartInstance: null,
       // 选中数组
       ids: [],
       // 非单个禁用
@@ -514,15 +560,15 @@ export default {
         dateTime: undefined,
         downloadType: 1,
       },
-      payBoardGroup: ["销售额"],
-      adEffectGroup: ["曝光量"],
+      payBoardGroup: ["销售额", "ACOS"],
+      adEffectGroup: ["曝光量", "点击率"],
       currentTime: [],
       datePreset: {
-        LAST_DAY: 'LAST_DAY',
-        LAST_7_DAY: 'LAST_7_DAY',
-        LAST_30_DAY: 'LAST_30_DAY',
-        LAST_90_DAY: 'LAST_90_DAY',
-      }
+        LAST_DAY: "LAST_DAY",
+        LAST_7_DAY: "LAST_7_DAY",
+        LAST_30_DAY: "LAST_30_DAY",
+        LAST_90_DAY: "LAST_90_DAY",
+      },
     };
   },
   created() {
@@ -546,19 +592,34 @@ export default {
     //this.initTime();
   },
   methods: {
+    toggleOpen() {
+      this.isOpen = !this.isOpen;
+    },
     changeDate(dateType) {
-      switch(dateType) {
+      switch (dateType) {
         case this.datePreset.LAST_DAY:
-          this.queryParams.dateTime = [dayjs().subtract(1, 'day').startOf('day').format('YYYY-MM-DD'), dayjs().endOf('day').format('YYYY-MM-DD')];
+          this.queryParams.dateTime = [
+            dayjs().subtract(1, "day").startOf("day").format("YYYY-MM-DD"),
+            dayjs().endOf("day").format("YYYY-MM-DD"),
+          ];
           break;
         case this.datePreset.LAST_7_DAY:
-          this.queryParams.dateTime = [dayjs().subtract(7, 'day').startOf('day').format('YYYY-MM-DD'), dayjs().endOf('day').format('YYYY-MM-DD')];
+          this.queryParams.dateTime = [
+            dayjs().subtract(7, "day").startOf("day").format("YYYY-MM-DD"),
+            dayjs().endOf("day").format("YYYY-MM-DD"),
+          ];
           break;
         case this.datePreset.LAST_30_DAY:
-          this.queryParams.dateTime = [dayjs().subtract(30, 'day').startOf('day').format('YYYY-MM-DD'), dayjs().endOf('day').format('YYYY-MM-DD')];
+          this.queryParams.dateTime = [
+            dayjs().subtract(30, "day").startOf("day").format("YYYY-MM-DD"),
+            dayjs().endOf("day").format("YYYY-MM-DD"),
+          ];
           break;
         case this.datePreset.LAST_90_DAY:
-          this.queryParams.dateTime = [dayjs().subtract(90, 'day').startOf('day').format('YYYY-MM-DD'), dayjs().endOf('day').format('YYYY-MM-DD')];
+          this.queryParams.dateTime = [
+            dayjs().subtract(90, "day").startOf("day").format("YYYY-MM-DD"),
+            dayjs().endOf("day").format("YYYY-MM-DD"),
+          ];
           break;
       }
 
@@ -575,6 +636,10 @@ export default {
 
       if (self.mainTwo) {
         self.mainTwo.resize();
+      }
+
+      if (self.top10ChartInstance) {
+        self.top10ChartInstance.resize();
       }
     },
     handlePayBoardGroupChange(val) {
@@ -772,6 +837,15 @@ export default {
       this.activeNameThree = "first";
       this.queryParams.startDate = this.queryParams.dateTime[0];
       this.queryParams.endDate = this.queryParams.dateTime[1];
+      queryTop10Campaign({
+        shopId: this.queryParams.shopId,
+        startDate: this.queryParams.startDate,
+        endDate: this.queryParams.endDate,
+      }).then((response) => {
+        if (response.data) {
+          this.top10Compaign = response.data.reverse();
+        }
+      });
       queryBiReport(this.queryParams).then((response) => {
         if (response.data.chartTotalResponseDto != null) {
           this.totalFees = response.data.chartTotalResponseDto.fees;
@@ -828,6 +902,7 @@ export default {
         this.myEcharts();
         this.handlePayBoardGroupChange();
         this.handleAdEffectGroupChange();
+        this.renderChartTop10Compaign();
         loadingInstance.close();
         //this.myEchartsTwo();
         // this.myEchartsThree();
@@ -979,11 +1054,56 @@ export default {
       };
       this.main.setOption(option);
     },
+    renderChartTop10Compaign() {
+      this.top10ChartInstance = this.$echarts.init(
+        document.getElementById("top10Compaign")
+      );
+      var option = {
+        grid: {
+          left: 120
+        },
+        tooltip: {
+          trigger: "axis",
+          backgroundColor: "rgba(255, 255, 255,.95)",
+          borderColor: "rgba(32, 33, 36,0.20)",
+          borderWidth: 1,
+          textStyle: {
+            // 文字提示样式
+            color: "#666",
+            fontSize: "12",
+          },
+        },
+        yAxis: {
+          type: "category",
+          data: this.top10Compaign.map((val) => val.campaignName),
+          axisLabel: {
+            width: 100,
+            overflow: 'truncate',
+            ellipsis: '...',
+          }
+        },
+        xAxis: {
+          type: "value",
+        },
+        series: [
+          {
+            type: "bar",
+            name: "销售额",
+            data: this.top10Compaign.map((val) => val.salesFees),
+          },
+        ],
+        color: ["#FF6505"],
+        legend: {
+          show: true,
+          bottom: 0
+        }
+      };
+      this.top10ChartInstance.setOption(option);
+    },
     myEchartsOne(params) {
       if (!this.mainOne) {
         this.mainOne = this.$echarts.init(document.getElementById("mainOne"));
       }
-      console.log(params.y);
       var option = {
         grid: {
           y: 20,
@@ -1011,6 +1131,19 @@ export default {
           bottom: 0,
         },
       };
+      if (params.series.length === 2) {
+        const [leftYScale, rightYScale] = getInterval(
+          params.series[0].data,
+          params.series[1].data
+        );
+        option.yAxis[0].min = leftYScale.min;
+        option.yAxis[0].max = leftYScale.max;
+        option.yAxis[0].interval = leftYScale.interval;
+        option.yAxis[1].min = rightYScale.min;
+        option.yAxis[1].max = rightYScale.max;
+        option.yAxis[1].interval = rightYScale.interval;
+      }
+
       this.mainOne.clear();
       if (params.series.length) {
         this.$nextTick(() => {
@@ -1050,6 +1183,18 @@ export default {
           bottom: 0,
         },
       };
+      if (params.series.length === 2) {
+        const [leftYScale, rightYScale] = getInterval(
+          params.series[0].data,
+          params.series[1].data
+        );
+        option.yAxis[0].min = leftYScale.min;
+        option.yAxis[0].max = leftYScale.max;
+        option.yAxis[0].interval = leftYScale.interval;
+        option.yAxis[1].min = rightYScale.min;
+        option.yAxis[1].max = rightYScale.max;
+        option.yAxis[1].interval = rightYScale.interval;
+      }
       this.mainTwo.clear();
       if (params.series.length) {
         this.$nextTick(() => {
@@ -1409,5 +1554,15 @@ export default {
   font-size: 12px;
   line-height: 150%;
   color: #666666;
+}
+.openCloseTag {
+  font-family: "PingFang SC";
+  font-style: normal;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 100%;
+  /* identical to box height, or 12px */
+
+  color: #8c8c8c;
 }
 </style>

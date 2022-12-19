@@ -38,7 +38,7 @@
     "core-js": "3.19.1",
     "dayjs": "^1.11.7",
     "debounce": "^1.2.1",
-    "echarts": "4.9.0",
+    "echarts": "^5.4.1",
     "el-tree-transfer": "^2.4.7",
     "element-ui": "2.15.6",
     "file-saver": "2.0.5",

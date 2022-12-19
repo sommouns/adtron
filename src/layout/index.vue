@@ -4,10 +4,10 @@
     <navbar/>
     <div :class="{hasTagsView:needTagsView}" class="main-container flex">
       <sidebar class="sidebar-container"  style="height: calc(100vh - 50px); overflow: scroll"/>
-      <div :class="{'fixed-header':fixedHeader}">
-        <!-- <tags-view v-if="needTagsView" /> -->
+      <div class="flex-1 flex flex-col" style="height: calc(100vh - 50px); overflow: hidden">
+        <tags-view v-if="needTagsView" />
+        <app-main class="app-main flex-1" style="overflow: scroll"/>
       </div>
-      <app-main class="app-main" style="height: calc(100vh - 50px); overflow: scroll"/>
       <!-- <right-panel>
         <settings />
       </right-panel> -->

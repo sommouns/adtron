@@ -379,6 +379,14 @@ export function queryBiReport(data) {
   })
 }
 
+// 首页报表获取top10活动销售额
+export function queryTop10Campaign(data) {
+  return request({
+    url: '/message/chart/line/data/campaign',
+    method: 'post',
+    data: data
+  })
+}
 //
 export function queryKeywordsList(data) {
   return request({
