@@ -69,7 +69,7 @@ function getIntervalNum(arr, splitNumber) {
     yScale.max = max;
     yScale.min = min;
     yScale.interval = o;
-    yScale.intervalNum = (max - min) / o;
+    yScale.intervalNum = ((max - min) / o).toFixed(2);
     return yScale;
 }
 /**

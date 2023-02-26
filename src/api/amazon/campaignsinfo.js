@@ -379,6 +379,24 @@ export function queryBiReport(data) {
   })
 }
 
+// 首页报表-广告出单商品
+export function queryBiPurchase(data) {
+  return request({
+    url: '/chart/line/data/purchase',
+    method: 'post',
+    data: data
+  })
+}
+
+// 首页报表-广告活动位置
+export function queryBiPlacement(data) {
+  return request({
+    url: '/chart/line/data/placement',
+    method: 'post',
+    data: data
+  })
+}
+
 //
 export function labKeywordLaunchList(data) {
   return request({
