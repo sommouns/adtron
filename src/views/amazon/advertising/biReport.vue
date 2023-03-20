@@ -458,44 +458,37 @@
               ></template>
               <template v-else>
                 <el-table-column
-                  sortable
                   label="广告活动"
                   align="center"
                   prop="campaignName"
                 />
                 <el-table-column
-                  sortable
                   label="广告位置"
                   align="center"
                   prop="placement"
                 />
                 <el-table-column
-                  sortable
                   label="展示量占比"
                   align="center"
                   prop="impressionsProportion"
                 />
                 <el-table-column
-                  sortable
                   label="点击量占比"
                   align="center"
                   prop="clicksProportion"
                 >
                 </el-table-column>
                 <el-table-column
-                  sortable
                   label="总销售额占比"
                   align="center"
                   prop="sevenSalesProportion"
                 />
                 <el-table-column
-                  sortable
                   label="花费占比"
                   align="center"
                   prop="feesProportion"
                 />
                 <el-table-column
-                  sortable
                   label="ACOS"
                   align="center"
                   prop="acos"
